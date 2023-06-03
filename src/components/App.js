@@ -1,21 +1,60 @@
 import React from 'react';
-
+import { useState } from 'react';
 import Header from './Header.js';
 import Main from './Main.js';
 import Footer from './Footer.js';
 
 import PopupWithForm from './PopupWithForm.js';
 import ImagePopup from './ImagePopup.js';
+import { api } from '../utils/Api.js';
 
 function App() {
+  const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
+  const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
+  const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
+  const [selectedCard, setSelectedCard] = React.useState(null);
+
+  function handleEditAvatarClick() {
+    setIsEditAvatarPopupOpen(true);
+  }
+
+  function handleEditProfileClick() {
+    setIsEditProfilePopupOpen(true);
+  }
+
+  function handleAddPlaceClick() {
+    setIsAddPlacePopupOpen(true);
+  }
+
+  function handleCardClick(card) {
+    setSelectedCard(card);
+  }
+
+  function closeAllPopups() {
+    setIsEditAvatarPopupOpen(false);
+    setIsEditProfilePopupOpen(false);
+    setIsAddPlacePopupOpen(false);
+    setSelectedCard(null);
+  }
+
   return (
     <>
       <div className="page">
         <Header />
-        <Main />
+        <Main
+          onEditProfile={handleEditProfileClick}
+          onAddPlace={handleAddPlaceClick}
+          onEditAvatar={handleEditAvatarClick}
+          onCardClick={handleCardClick}
+        />
         <Footer />
         {/* ----------------------------------------------------- */}
-        <PopupWithForm title={'Редактировать профиль'} name={'edit'}>
+        <PopupWithForm
+          title={'Редактировать профиль'}
+          name={'edit'}
+          isOpen={isEditProfilePopupOpen}
+          onClose={closeAllPopups}
+        >
           <label className="popup__form-field">
             <input
               type="text"
@@ -42,7 +81,12 @@ function App() {
           </label>
         </PopupWithForm>
         {/* -------------------------------------------------------- */}
-        <PopupWithForm title={'Новое место'} name={'add'}>
+        <PopupWithForm
+          title={'Новое место'}
+          name={'add'}
+          isOpen={isAddPlacePopupOpen}
+          onClose={closeAllPopups}
+        >
           <label className="popup__form-field">
             <input
               type="text"
@@ -67,9 +111,14 @@ function App() {
           </label>
         </PopupWithForm>
         {/* ---------------------------------------------------------- */}
-        <ImagePopup></ImagePopup>
+        <ImagePopup card={selectedCard} onClose={closeAllPopups}></ImagePopup>
         {/* --------------------------------------------------------------- */}
-        <PopupWithForm title={'Обновить аватар'} name={'avatar'}>
+        <PopupWithForm
+          title={'Обновить аватар'}
+          name={'avatar'}
+          isOpen={isEditAvatarPopupOpen}
+          onClose={closeAllPopups}
+        >
           <label className="popup__form-field">
             <input
               type="url"

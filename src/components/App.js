@@ -6,12 +6,13 @@ import Footer from './Footer.js';
 
 import PopupWithForm from './PopupWithForm.js';
 import ImagePopup from './ImagePopup.js';
-import { api } from '../utils/Api.js';
+import { api } from '../utils/api.js';
 
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
+  const [isConfirmationPopupOpen, setIsConfirmationPopupOpen] = useState(false);
   const [selectedCard, setSelectedCard] = React.useState(null);
 
   function handleEditAvatarClick() {
@@ -26,6 +27,10 @@ function App() {
     setIsAddPlacePopupOpen(true);
   }
 
+  function handleConfirmationClick() {
+    setIsConfirmationPopupOpen(true);
+  }
+
   function handleCardClick(card) {
     setSelectedCard(card);
   }
@@ -34,11 +39,12 @@ function App() {
     setIsEditAvatarPopupOpen(false);
     setIsEditProfilePopupOpen(false);
     setIsAddPlacePopupOpen(false);
+    setIsConfirmationPopupOpen(false);
     setSelectedCard(null);
   }
 
   return (
-    <>
+    <div className="root">
       <div className="page">
         <Header />
         <Main
@@ -50,8 +56,8 @@ function App() {
         <Footer />
         {/* ----------------------------------------------------- */}
         <PopupWithForm
-          title={'Редактировать профиль'}
-          name={'edit'}
+          title="Редактировать профиль"
+          name="edit"
           isOpen={isEditProfilePopupOpen}
           onClose={closeAllPopups}
         >
@@ -82,8 +88,8 @@ function App() {
         </PopupWithForm>
         {/* -------------------------------------------------------- */}
         <PopupWithForm
-          title={'Новое место'}
-          name={'add'}
+          title="Новое место"
+          name="add"
           isOpen={isAddPlacePopupOpen}
           onClose={closeAllPopups}
         >
@@ -114,8 +120,8 @@ function App() {
         <ImagePopup card={selectedCard} onClose={closeAllPopups}></ImagePopup>
         {/* --------------------------------------------------------------- */}
         <PopupWithForm
-          title={'Обновить аватар'}
-          name={'avatar'}
+          title="Обновить аватар"
+          name="avatar"
           isOpen={isEditAvatarPopupOpen}
           onClose={closeAllPopups}
         >
@@ -131,7 +137,13 @@ function App() {
           </label>
         </PopupWithForm>
         {/* ----------------------------------------------------- */}
-        <div className="popup popup_type_confirmation">
+        <PopupWithForm
+          title="Вы уверены?"
+          name="confirmation"
+          isOpen={isConfirmationPopupOpen}
+          onClose={closeAllPopups}
+        ></PopupWithForm>
+        {/* <div className="popup popup_type_confirmation">
           <div className="popup__container">
             <button className="popup__button-close" type="button" />
             <h2 className="popup__title">Вы уверены?</h2>
@@ -139,11 +151,10 @@ function App() {
               Да
             </button>
           </div>
-        </div>
+        </div> */}
         {/* -------------------------------------------------------- */}
-        <template id="element-template" />
       </div>
-    </>
+    </div>
   );
 }
 

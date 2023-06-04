@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { api } from '../utils/Api.js';
+import { api } from '../utils/api.js';
 // import { initialCards } from '../utils/Utils.js';
 import Card from './Card.js';
 
@@ -35,13 +35,10 @@ function Main(props) {
           })
         );
       })
-      .then(() => {
-        console.log(cards);
-      })
       .catch((err) => {
         console.log(err);
       });
-  });
+  }, []);
 
   return (
     <main className="content">

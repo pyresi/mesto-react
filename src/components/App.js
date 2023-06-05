@@ -6,7 +6,6 @@ import Footer from './Footer.js';
 
 import PopupWithForm from './PopupWithForm.js';
 import ImagePopup from './ImagePopup.js';
-import { api } from '../utils/api.js';
 
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);

@@ -55,7 +55,16 @@ class Api {
     }).then(this._checkResponse);
   }
 
+  changeLikeCardStatus(cardId, isLiked) {
+    if (isLiked) {
+      return this.putLike(cardId);
+    } else {
+      return this.deleteLike(cardId);
+    }
+  }
+
   putLike(cardId) {
+    // console.log(cardId);
     return fetch(`${this.baseUrl}/cards/${cardId}/likes`, {
       method: 'PUT',
       headers: this.headers,

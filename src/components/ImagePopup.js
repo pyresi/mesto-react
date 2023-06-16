@@ -1,7 +1,14 @@
 function ImagePopup(props) {
+  function handleBackgroundClick(e) {
+    if (e.target === e.currentTarget) {
+      props.onClose();
+    }
+  }
+
   return (
     <div
       className={`popup popup_type_photo ${props.card ? 'popup_opened' : ''}`}
+      onClick={handleBackgroundClick}
     >
       <div className="popup__container popup__container_type_photo">
         <button

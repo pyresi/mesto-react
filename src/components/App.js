@@ -4,12 +4,13 @@ import Header from './Header.js';
 import Main from './Main.js';
 import Footer from './Footer.js';
 import { api } from '../utils/api.js';
-import { userContext } from '../contexts/CurrentUserContext.js';
+import { UserContext } from '../contexts/CurrentUserContext.js';
 import PopupWithForm from './PopupWithForm.js';
 import ImagePopup from './ImagePopup.js';
 import EditProfilePopup from './EditProfilePopup.js';
 import EditAvatarPopup from './EditAvatarPopup.js';
 import AddPlacePopup from './AddPlacePopup.js';
+import { AppContext } from '../contexts/CurrentAppContext.js';
 
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
@@ -19,22 +20,18 @@ function App() {
   const [selectedCard, setSelectedCard] = useState(null);
   const [currentUser, setCurrentUser] = useState({}); //хук состояния. нужен для изменения состояния компонента
   const [cards, setCards] = useState([]);
+  const [isLoading, setIsLoading] = React.useState(false);
 
   useEffect(() => {
-    api
-      .getUserInfo()
-      .then((user) => {
-        setCurrentUser(user);
+    Promise.all([api.getUserInfo(), api.getInitialCards()])
+      // тут деструктурируете ответ от сервера, чтобы было понятнее, что пришло
+      .then(([userData, cards]) => {
+        // тут установка данных пользователя
+        // и тут отрисовка карточек
+        setCurrentUser(userData);
+        setCards(cards);
       })
-      .then(() => {
-        return api.getInitialCards();
-      })
-      .then((cardsData) => {
-        setCards(cardsData);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+      .catch(console.error);
   }, []);
 
   function handleEditAvatarClick() {
@@ -52,6 +49,27 @@ function App() {
   function handleConfirmationClick() {
     setIsConfirmationPopupOpen(true);
   }
+
+  const isOpen =
+    isEditAvatarPopupOpen ||
+    isEditProfilePopupOpen ||
+    isAddPlacePopupOpen ||
+    selectedCard;
+
+  useEffect(() => {
+    function closeByEscape(evt) {
+      if (evt.key === 'Escape') {
+        closeAllPopups();
+      }
+    }
+    if (isOpen) {
+      // навешиваем только при открытии
+      document.addEventListener('keydown', closeByEscape);
+      return () => {
+        document.removeEventListener('keydown', closeByEscape);
+      };
+    }
+  }, [isOpen]);
 
   function handleCardClick(card) {
     setSelectedCard(card);
@@ -77,9 +95,7 @@ function App() {
           return state.map((c) => (c._id === card._id ? newCard : c));
         });
       })
-      .catch((err) => {
-        console.log(err);
-      });
+      .catch(console.error);
   }
 
   function handleCardDelete(card) {
@@ -87,14 +103,13 @@ function App() {
     api
       .deleteCard(card._id)
       .then(() => {
-        setCards(cards.filter((element) => element._id !== card._id));
+        setCards((state) => state.filter((item) => item._id !== card._id));
       })
-      .catch((err) => {
-        console.log(err);
-      });
+      .catch(console.error);
   }
 
   function handleUpdateUser(name, about) {
+    setIsLoading(true);
     api
       .editUserInfo(name, about)
       .then((result) => {
@@ -102,12 +117,14 @@ function App() {
         setCurrentUser(result);
         closeAllPopups();
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(console.error)
+      .finally(() => {
+        setIsLoading(false);
       });
   }
 
   function handleAvatar(link) {
+    setIsLoading(true);
     api
       .changeAvatar(link)
       .then((result) => {
@@ -115,20 +132,23 @@ function App() {
         setCurrentUser(result);
         closeAllPopups();
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(console.error)
+      .finally(() => {
+        setIsLoading(false);
       });
   }
 
   function handleAddPlaceSubmit(name, link) {
+    setIsLoading(true);
     api
       .postCard(name, link)
       .then((newCard) => {
         setCards([newCard, ...cards]);
         closeAllPopups();
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(console.error)
+      .finally(() => {
+        setIsLoading(false);
       });
   }
 
@@ -136,59 +156,48 @@ function App() {
     <div className="root">
       {/* Создали провайдер для передачи контекста в лежащие внутри компоненты */}
       {/* Передали в значение текущий стейт и изменение его состояния */}
-      <userContext.Provider value={{ currentUser, setCurrentUser }}>
-        <div className="page">
-          <Header />
-          <Main
-            onEditProfile={handleEditProfileClick}
-            onAddPlace={handleAddPlaceClick}
-            onEditAvatar={handleEditAvatarClick}
-            onCardClick={handleCardClick}
-            onCardLike={handleCardLike}
-            setCards={setCards}
-            cards={cards}
-            onCardDelete={handleCardDelete}
-          />
-          <Footer />
-          {/* ----------------------------------------------------- */}
-          <EditProfilePopup
-            isOpen={isEditProfilePopupOpen}
-            onClose={closeAllPopups}
-            onUpdateUser={handleUpdateUser}
-          />
-          {/* -------------------------------------------------------- */}
-          <AddPlacePopup
-            isOpen={isAddPlacePopupOpen}
-            onClose={closeAllPopups}
-            onSubmit={handleAddPlaceSubmit}
-          ></AddPlacePopup>
-          {/* ---------------------------------------------------------- */}
-          <ImagePopup card={selectedCard} onClose={closeAllPopups}></ImagePopup>
-          {/* --------------------------------------------------------------- */}
-          <EditAvatarPopup
-            isOpen={isEditAvatarPopupOpen}
-            onClose={closeAllPopups}
-            onSubmit={handleAvatar}
-          />
-          {/* ----------------------------------------------------- */}
-          <PopupWithForm
-            title="Вы уверены?"
-            name="confirmation"
-            isOpen={isConfirmationPopupOpen}
-            onClose={closeAllPopups}
-          ></PopupWithForm>
-          {/* <div className="popup popup_type_confirmation">
-            <div className="popup__container">
-              <button className="popup__button-close" type="button" />
-              <h2 className="popup__title">Вы уверены?</h2>
-              <button className="popup__button-save" type="button">
-                Да
-              </button>
-            </div>
-          </div> */}
-          {/* -------------------------------------------------------- */}
-        </div>
-      </userContext.Provider>
+      <AppContext.Provider value={{ isLoading, closeAllPopups }}>
+        <UserContext.Provider value={{ currentUser, setCurrentUser }}>
+          <div className="page">
+            <Header />
+            <Main
+              onEditProfile={handleEditProfileClick}
+              onAddPlace={handleAddPlaceClick}
+              onEditAvatar={handleEditAvatarClick}
+              onCardClick={handleCardClick}
+              onCardLike={handleCardLike}
+              setCards={setCards}
+              cards={cards}
+              onCardDelete={handleCardDelete}
+            />
+            <Footer />
+            {/* ----------------------------------------------------- */}
+            <EditProfilePopup
+              isOpen={isEditProfilePopupOpen}
+              onUpdateUser={handleUpdateUser}
+            />
+            {/* -------------------------------------------------------- */}
+            <AddPlacePopup
+              isOpen={isAddPlacePopupOpen}
+              onSubmit={handleAddPlaceSubmit}
+            ></AddPlacePopup>
+            {/* ---------------------------------------------------------- */}
+            <ImagePopup card={selectedCard}></ImagePopup>
+            {/* --------------------------------------------------------------- */}
+            <EditAvatarPopup
+              isOpen={isEditAvatarPopupOpen}
+              onSubmit={handleAvatar}
+            />
+            {/* ----------------------------------------------------- */}
+            <PopupWithForm
+              title="Вы уверены?"
+              name="confirmation"
+              isOpen={isConfirmationPopupOpen}
+              onClose={closeAllPopups}
+            ></PopupWithForm>
+          </div>
+        </UserContext.Provider>
+      </AppContext.Provider>
     </div>
   );
 }

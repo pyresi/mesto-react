@@ -1,29 +1,31 @@
-function ImagePopup(props) {
+import { AppContext } from '../contexts/CurrentAppContext';
+import { useContext } from 'react';
+
+function ImagePopup({ card }) {
+  const { closeAllPopups } = useContext(AppContext);
   function handleBackgroundClick(e) {
     if (e.target === e.currentTarget) {
-      props.onClose();
+      closeAllPopups();
     }
   }
 
   return (
     <div
-      className={`popup popup_type_photo ${props.card ? 'popup_opened' : ''}`}
+      className={`popup popup_type_photo ${card ? 'popup_opened' : ''}`}
       onClick={handleBackgroundClick}
     >
       <div className="popup__container popup__container_type_photo">
         <button
           className="popup__button-close"
           type="button"
-          onClick={props.onClose}
+          onClick={closeAllPopups}
         />
         <img
           className="popup__photo"
-          src={props.card ? props.card.link : ''}
-          alt={props.card ? props.card.name : ''}
+          src={card ? card.link : ''}
+          alt={card ? card.name : ''}
         />
-        <h2 className="popup__photo-subtitle">
-          {props.card ? props.card.name : ''}
-        </h2>
+        <h2 className="popup__photo-subtitle">{card ? card.name : ''}</h2>
       </div>
     </div>
   );

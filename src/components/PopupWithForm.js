@@ -1,32 +1,42 @@
-function PopupWithForm(props) {
+import { AppContext } from '../contexts/CurrentAppContext';
+import { useContext } from 'react';
+
+function PopupWithForm({
+  isOpen,
+  onSubmit,
+  name,
+  title,
+  buttonText,
+  children,
+}) {
+  const { closeAllPopups } = useContext(AppContext);
+
   function handleBackgroundClick(e) {
     if (e.target === e.currentTarget) {
-      props.onClose();
+      closeAllPopups();
     }
   }
 
   return (
     <div
-      className={`popup popup_type_${props.name} ${
-        props.isOpen ? 'popup_opened' : ''
-      }`}
+      className={`popup popup_type_${name} ${isOpen ? 'popup_opened' : ''}`}
       onClick={handleBackgroundClick}
     >
       <div className="popup__container">
         <button
           className="popup__button-close"
           type="button"
-          onClick={props.onClose}
+          onClick={closeAllPopups}
         />
-        <h2 className="popup__title">{props.title}</h2>
+        <h2 className="popup__title">{title}</h2>
         <form
-          name={`popup-form-${props.name}`}
+          name={`popup-form-${name}`}
           className="popup__form"
-          onSubmit={props.onSubmit}
+          onSubmit={onSubmit}
         >
-          {props.children}
+          {children}
           <button className="popup__button-save" type="submit">
-            Сохранить
+            {buttonText}
           </button>
         </form>
       </div>

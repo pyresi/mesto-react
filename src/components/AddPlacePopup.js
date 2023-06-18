@@ -1,35 +1,34 @@
 import PopupWithForm from './PopupWithForm';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import React from 'react';
+import { AppContext } from '../contexts/CurrentAppContext';
 
-function AddPlacePopup(props) {
-  const linkRef = React.useRef();
+function AddPlacePopup({ isOpen, onSubmit }) {
+  const { isLoading } = useContext(AppContext);
   const [link, setLink] = useState('');
-
-  const nameRef = React.useRef();
   const [name, setName] = useState('');
 
-  function handleLinkChange() {
-    setLink(linkRef.current.value);
+  function handleLinkChange(e) {
+    setLink(e.target.value);
   }
 
-  function handleNameChange() {
-    setName(nameRef.current.value);
+  function handleNameChange(e) {
+    setName(e.target.value);
   }
 
   function handleSubmit(e) {
     e.preventDefault();
 
-    props.onSubmit(name, link);
+    onSubmit(name, link);
   }
 
   return (
     <PopupWithForm
       title="Новое место"
       name="add"
-      isOpen={props.isOpen}
-      onClose={props.onClose}
+      isOpen={isOpen}
       onSubmit={handleSubmit}
+      buttonText={isLoading ? 'Сохранение...' : 'Сохранить'}
     >
       <label className="popup__form-field">
         <input
@@ -40,7 +39,6 @@ function AddPlacePopup(props) {
           minLength={2}
           maxLength={30}
           required=""
-          ref={nameRef}
           value={name}
           onChange={handleNameChange}
         />
@@ -53,7 +51,6 @@ function AddPlacePopup(props) {
           className="popup__input popup__input_type_link"
           placeholder="Ссылка на картинку"
           required=""
-          ref={linkRef}
           value={link}
           onChange={handleLinkChange}
         />

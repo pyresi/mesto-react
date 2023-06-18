@@ -1,13 +1,15 @@
 import PopupWithForm from './PopupWithForm';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import React from 'react';
-import { userContext } from '../contexts/CurrentUserContext.js';
+import { UserContext } from '../contexts/CurrentUserContext.js';
+import { AppContext } from '../contexts/CurrentAppContext';
 
-function EditProfilePopup(props) {
+function EditProfilePopup({ isOpen, onUpdateUser }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   // Подписка на контекст
-  const context = React.useContext(userContext);
+  const context = useContext(UserContext);
+  const { isLoading } = useContext(AppContext);
 
   // После загрузки текущего пользователя из API
   // его данные будут использованы в управляемых компонентах.
@@ -19,7 +21,7 @@ function EditProfilePopup(props) {
     if (context.currentUser.about) {
       setDescription(context.currentUser.about);
     }
-  }, [context]);
+  }, [context, isOpen]);
 
   function handleNameChange(e) {
     setName(e.target.value);
@@ -34,16 +36,16 @@ function EditProfilePopup(props) {
     e.preventDefault();
 
     // Передаём значения управляемых компонентов во внешний обработчик
-    props.onUpdateUser(name, description);
+    onUpdateUser(name, description);
   }
 
   return (
     <PopupWithForm
       title="Редактировать профиль"
       name="edit"
-      isOpen={props.isOpen}
-      onClose={props.onClose}
+      isOpen={isOpen}
       onSubmit={handleSubmit}
+      buttonText={isLoading ? 'Сохранение...' : 'Сохранить'}
     >
       <label className="popup__form-field">
         <input

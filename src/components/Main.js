@@ -1,7 +1,7 @@
 import { useEffect, useContext } from 'react';
 import { api } from '../utils/api.js';
 import Card from './Card.js';
-import { userContext } from '../contexts/CurrentUserContext.js';
+import { UserContext } from '../contexts/CurrentUserContext.js';
 
 function Main({
   onEditAvatar,
@@ -12,7 +12,7 @@ function Main({
   onCardLike,
   cards,
 }) {
-  const { currentUser, setCurrentUser } = useContext(userContext);
+  const { currentUser } = useContext(UserContext);
 
   return (
     <main className="content">
@@ -49,7 +49,7 @@ function Main({
       <div className="elements">
         {cards.map((card, i) => (
           <Card
-            key={i}
+            key={card._id}
             card={card}
             onCardClick={onCardClick}
             onCardLike={onCardLike}
